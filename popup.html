@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Content Filter</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <main>
+    <h1>AI Content Filter</h1>
+    <p id="status">Hidden so far: <span id="count">0</span></p>
+
+    <label class="toggle-row">
+      <span>Enabled on this device</span>
+      <input type="checkbox" id="enabledToggle" checked />
+    </label>
+
+    <a id="feedbackLink" class="link-row" href="#" target="_blank" rel="noopener">
+      Got feedback / found a miss?
+    </a>
+
+    <a id="supportLink" class="link-row" href="#" target="_blank" rel="noopener">
+      Support this project
+    </a>
+  </main>
+
+  <footer>
+    <a id="forgeLink" href="https://forgevertical.com" target="_blank" rel="noopener">
+      Built by Forge Vertical
+    </a>
+  </footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>
