@@ -1,6 +1,4 @@
-// TODO: swap this for your real support/donate link once you have one
-// (a Stripe payment link or Buy Me a Coffee page both work fine).
-const SUPPORT_URL = "https://forgevertical.com";
+const SUPPORT_URL = "https://buymeacoffee.com/Prinymity";
 
 // Firebase web config isn't a secret — it just identifies the project.
 // What actually protects this is the Firestore security rules (create-only,

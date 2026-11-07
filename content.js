@@ -1,11 +1,32 @@
 /**
  * AI Content Filter — content script
  *
- * v1 approach: Facebook and Instagram already badge a lot of AI-generated
- * media themselves ("AI info" labels, built from C2PA metadata on images
- * uploaded from tools that embed it). Instead of running our own detection
- * model, this script looks for that existing label and hides the post it
- * belongs to.
+ * v1 approach: Facebook, Instagram, Google Search/Images and LinkedIn
+ * already badge a lot of AI-generated media themselves ("AI info" on Meta,
+ * "AI-generated" overlay on Google Images, a small icon + Content
+ * Credentials panel on LinkedIn), mostly built from C2PA metadata the
+ * generating tool embedded. Instead of running our own detection model,
+ * this script looks for that existing label/category text and hides the
+ * post or result it belongs to. Same logic runs on all four sites — no
+ * site-specific code, just text/aria-label matching.
+ *
+ * Known gaps, confirmed by research rather than guessed:
+ * - Meta now hides the "AI info" label inside the post's three-dot menu
+ *   for AI-EDITED (not fully AI-generated) content — the label text may
+ *   not exist in the DOM at all until that menu is opened, so this script
+ *   can't catch those without auto-opening menus (too intrusive/fragile
+ *   to attempt). Fully AI-generated content still gets the prominent
+ *   label and is still caught.
+ * - LinkedIn's AI signal is icon-first, not a text label in the feed —
+ *   detection likely has to key off that icon's aria-label/tooltip text,
+ *   which hasn't been inspected live yet. Untested, needs the same
+ *   verify-and-adjust pass FB/IG got: open a post you know is AI-labelled,
+ *   check if it's caught, inspect the icon's accessible name if not.
+ * - Google Images is also untested live yet, though the label wording
+ *   ("AI Generated") is confirmed and already matches LABEL_PATTERNS.
+ * - Reddit has no platform-wide AI-content label and was deliberately
+ *   left out — what exists is per-subreddit moderator rules/flair with
+ *   no consistent text to match on.
  *
  * NOTE: Meta's DOM uses obfuscated, auto-generated class names that change
  * often, so this matches on visible TEXT / aria-label content instead of
@@ -20,7 +41,17 @@
     /\bAI info\b/i,
     /\bMade with AI\b/i,
     /\bAI[- ]generated\b/i,
+    /\bAI content\b/i,
   ];
+
+  // Meta's real "AI info" badge is 2-3 words. Facebook's auto-generated
+  // accessibility descriptions of image content ("May be an image of
+  // text that says '...'") are full sentences and can end up QUOTING
+  // text that's visibly printed on the image itself — including memes
+  // that are explicitly anti-AI. A short length cap filters those out
+  // structurally: real labels are short, image-content descriptions
+  // aren't.
+  const MAX_MATCH_LENGTH = 40;
 
   // How many ancestor levels to walk up from a matched label to find
   // the enclosing post/container to hide. Tuned loosely — err on the
@@ -29,9 +60,33 @@
 
   let hiddenCount = 0;
 
+  function ownText(el) {
+    // Direct text of this element only — NOT el.textContent, which
+    // aggregates every descendant's text too. Using textContent means
+    // a huge post container matches just because a caption buried deep
+    // inside it happens to contain a trigger phrase; ownText() only
+    // matches the specific small element that actually carries the text.
+    let text = "";
+    for (const child of el.childNodes) {
+      if (child.nodeType === Node.TEXT_NODE) text += child.textContent;
+    }
+    return text;
+  }
+
   function matchesAiLabel(el) {
-    const text = (el.getAttribute?.("aria-label") || "") + " " + (el.textContent || "");
-    return LABEL_PATTERNS.some((re) => re.test(text));
+    // Images and image-role elements carry Facebook's auto-generated
+    // content description in aria-label/alt — that describes what's
+    // VISIBLE in the picture (including OCR'd text), not whether Meta
+    // flagged it as AI-generated. Skip them entirely.
+    const tag = el.tagName?.toLowerCase();
+    if (tag === "img" || el.getAttribute?.("role") === "img") return false;
+
+    const ariaLabel = el.getAttribute?.("aria-label") || "";
+    const text = ownText(el);
+    const candidates = [ariaLabel, text].filter(
+      (s) => s && s.trim().length > 0 && s.length <= MAX_MATCH_LENGTH
+    );
+    return candidates.some((s) => LABEL_PATTERNS.some((re) => re.test(s)));
   }
 
   function looksLikePostContainer(el) {

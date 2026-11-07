@@ -1,19 +1,23 @@
 {
   "manifest_version": 3,
   "name": "AI Content Filter",
-  "version": "0.1.0",
-  "description": "Hides posts on Facebook and Instagram that carry Meta's own 'AI info' label.",
+  "version": "0.4.0",
+  "description": "Hides AI-labelled content on Facebook, Instagram, Google Search/Images and LinkedIn.",
   "permissions": ["storage"],
   "host_permissions": [
     "https://www.facebook.com/*",
     "https://www.instagram.com/*",
+    "https://www.google.com/search*",
+    "https://www.linkedin.com/*",
     "https://firestore.googleapis.com/*"
   ],
   "content_scripts": [
     {
       "matches": [
         "https://www.facebook.com/*",
-        "https://www.instagram.com/*"
+        "https://www.instagram.com/*",
+        "https://www.google.com/search*",
+        "https://www.linkedin.com/*"
       ],
       "js": ["content.js"],
       "run_at": "document_idle"
