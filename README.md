@@ -30,8 +30,33 @@ wording or you notice posts it misses.
 
 ## Feedback
 
-Links in the extension popup point to a feedback form and to
-[forgevertical.com](https://forgevertical.com) — update `popup.js` with
-the real feedback form URL before publishing.
+The popup writes feedback straight to Firestore (`forge-vertical` project,
+`extension_feedback` collection) via the REST API — no SDK bundling needed.
+
+**Before this goes live anywhere public**, set these Firestore security
+rules in the Firebase console (Firestore → Rules) so the extension can only
+*create* documents in that one collection, never read or modify existing
+ones, with basic field validation to block abuse/garbage writes:
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /extension_feedback/{docId} {
+      allow read, update, delete: if false;
+      allow create: if
+        request.resource.data.keys().hasAll(['message', 'createdAt', 'extensionVersion']) &&
+        request.resource.data.message is string &&
+        request.resource.data.message.size() <= 1000 &&
+        request.resource.data.message.size() > 0;
+    }
+  }
+}
+```
+
+Everything else in the project stays under your existing rules — this only
+opens one narrow door, write-only, for this one collection.
+
+Swap `SUPPORT_URL` in `popup.js` for a real donate link once you have one.
 
 Built by [Forge Vertical](https://forgevertical.com).

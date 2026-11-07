@@ -40,6 +40,47 @@ h1 {
   text-decoration: underline;
 }
 
+.feedback-label {
+  display: block;
+  font-size: 12px;
+  color: #1c1e21;
+  margin-bottom: 4px;
+}
+
+#feedbackText {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 12px;
+  padding: 6px;
+  border: 1px solid #ccd0d5;
+  border-radius: 6px;
+  resize: vertical;
+}
+
+#feedbackSubmit {
+  margin-top: 6px;
+  font-size: 12px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 6px;
+  background: #1877f2;
+  color: #fff;
+  cursor: pointer;
+}
+
+#feedbackSubmit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.feedback-status {
+  font-size: 11px;
+  color: #65676b;
+  margin: 4px 0 0;
+  min-height: 14px;
+}
+
 footer {
   border-top: 1px solid #eee;
   padding: 8px 14px;

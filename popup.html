@@ -15,9 +15,12 @@
       <input type="checkbox" id="enabledToggle" checked />
     </label>
 
-    <a id="feedbackLink" class="link-row" href="#" target="_blank" rel="noopener">
-      Got feedback / found a miss?
-    </a>
+    <div id="feedbackBlock">
+      <label for="feedbackText" class="feedback-label">Got feedback / found a miss?</label>
+      <textarea id="feedbackText" rows="3" placeholder="e.g. this missed an AI post on my feed..."></textarea>
+      <button id="feedbackSubmit">Send feedback</button>
+      <p id="feedbackStatus" class="feedback-status"></p>
+    </div>
 
     <a id="supportLink" class="link-row" href="#" target="_blank" rel="noopener">
       Support this project
